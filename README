@@ -1,5 +1,7 @@
 This is an example SPH code being constructed for the Johns Hopkins University
 HEART course EN.500.111.13/14 by Adam Sierakowski.
 
+Compile using 'make' from src/
+
 For more information about the course, visit:
 http://ajsierakowski.org/teaching/en-500-111/
