@@ -11,13 +11,15 @@ LDLIBS = -lm
 
 all: sph
 
-sph: sph.o io.o vtk.o
+sph: sph.o io.o vtk.o rng.o
 
 sph.o: sph.c
 
 io.o: io.c
 
 vtk.o: vtk.c
+
+rng.o: rng.c
 
 clean:
 	rm *.o sph

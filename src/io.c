@@ -5,7 +5,9 @@
  */
 
 #include "io.h"
+#include "rng.h"
 #include "sph.h"
+#include "time.h"
 
 // read configuration from file
 void read_config(void)
@@ -55,6 +57,51 @@ void show_config(void)
     printf("part[%d]: (%7.4f, %7.4f, %7.4f), m = %7.4f\n", i,
       part[i].x, part[i].y, part[i].z, part[i].m);
   }
+}
+
+// randomly distribute particles and write configuration to file
+void write_config_random(int np, float xs, float xe, float ys, float ye,
+  float zs, float ze)
+{
+  int i;                    // iterator
+  char loc[BUFLEN] = "";    // file location
+  int fret = 0;             // fscanf return value
+  fret = fret;              // prevent compiler warning
+
+  float x, y, z, m;         // particle parameters to write
+
+  // set random number generator seed
+  rng_init(time(NULL));
+
+  // open output config file
+  sprintf(loc, "%s/config.rand", INDIR);
+  FILE *outfile = fopen(loc, "w");
+  if(outfile == NULL) {
+    fprintf(stderr, "Could not open file %s\n", loc);
+    exit(EXIT_FAILURE);
+  }
+
+  // write number of particles and header line
+  fprintf(outfile, "np %d\n", np);
+  fprintf(outfile, "(x, y, z) m\n");
+
+  // write each particle configuration
+  for(i = 0; i < np; i++) {
+    // restrict within given domain size
+    x  = (xe - xs) * rng_flt() + xs;
+    y  = (ye - ys) * rng_flt() + ys;
+    z  = (ze - zs) * rng_flt() + zs;
+    m  = 1.;
+    // write to file
+    fprintf(outfile, "%9.6f %9.6f %9.6f %9.6f\n",
+      x, y, z, m);
+  }
+
+  printf("Random configuration written to %s\n", loc);
+
+  // close output config file
+  fclose(outfile);
+  
 }
 
 // free allocated space at the end
