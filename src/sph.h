@@ -24,6 +24,12 @@ typedef struct part_struct {
   float y;
   float z;
   float m;
+  float vx;
+  float vy;
+  float vz;
+  float ax;
+  float ay;
+  float az;
   float Fx;
   float Fy;
   float Fz;
@@ -31,5 +37,17 @@ typedef struct part_struct {
 
 // create pointer to particle list
 part_struct *part;
+
+// current time
+float ttime;
+
+// total time
+float duration;
+
+// time step size
+float dt;
+
+// time step number
+int stepnum;
 
 #endif

@@ -27,6 +27,12 @@ void read_config(void)
 
   // begin reading config file
   fret = fscanf(infile, "np %d\n", &np);
+  fret = fscanf(infile, "duration %f\n", &duration);
+  fret = fscanf(infile, "dt %f\n", &dt);
+
+  // initialize current time and time step number
+  ttime = 0.;
+  stepnum = 0;
 
   // allocate particle list
   part = malloc(np * sizeof(part_struct));
@@ -36,7 +42,13 @@ void read_config(void)
   for(i = 0; i < np; i++) {
     fret = fscanf(infile, "%f %f %f %f\n", &part[i].x, &part[i].y, &part[i].z,
       &part[i].m);
-    // initialize forces equal to zero for now
+    // initialize forces, velocities, and accelerations equal to zero for now
+    part[i].vx = 0.;
+    part[i].vy = 0.;
+    part[i].vz = 0.;
+    part[i].ax = 0.;
+    part[i].ay = 0.;
+    part[i].az = 0.;
     part[i].Fx = 0.;
     part[i].Fy = 0.;
     part[i].Fz = 0.;
@@ -53,6 +65,8 @@ void show_config(void)
 
   // write configuration to stdout
   printf("np = %d\n", np);
+  printf("duration = %6.4f\n", duration);
+  printf("dt = %6.4f\n", dt);
   for(i = 0; i < np; i++) {
     printf("part[%d]: (%7.4f, %7.4f, %7.4f), m = %7.4f\n", i,
       part[i].x, part[i].y, part[i].z, part[i].m);
@@ -83,6 +97,7 @@ void write_config_random(int np, float xs, float xe, float ys, float ye,
 
   // write number of particles and header line
   fprintf(outfile, "np %d\n", np);
+  fprintf(outfile, "duration 1.\ndt 0.01\n");
   fprintf(outfile, "(x, y, z) m\n");
 
   // write each particle configuration
@@ -101,7 +116,6 @@ void write_config_random(int np, float xs, float xe, float ys, float ye,
 
   // close output config file
   fclose(outfile);
-  
 }
 
 // free allocated space at the end

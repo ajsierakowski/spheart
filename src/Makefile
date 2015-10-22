@@ -11,7 +11,7 @@ LDLIBS = -lm
 
 all: sph
 
-sph: sph.o io.o vtk.o rng.o
+sph: sph.o io.o vtk.o rng.o phys.o
 
 sph.o: sph.c
 
@@ -20,6 +20,8 @@ io.o: io.c
 vtk.o: vtk.c
 
 rng.o: rng.c
+
+phys.o: phys.c
 
 clean:
 	rm *.o sph

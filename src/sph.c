@@ -5,12 +5,17 @@
  */
 
 #include "io.h"
+#include "phys.h"
 #include "sph.h"
 #include "vtk.h"
 
 // define global variables
 int np;
 part_struct *part;
+float ttime;
+float duration;
+float dt;
+int stepnum;
 
 // begin main program
 int main(int argc, char *argv[])
@@ -67,8 +72,28 @@ int main(int argc, char *argv[])
     // initialize VTK file output
     init_vtk();
 
-    // write VTK file output
-    out_vtk(0, 0., np, part);
+    // write initial VTK file output
+    out_vtk(stepnum, ttime, np, part);
+
+    /** do time stepping **/
+    while(ttime < duration) {
+      // increment total time and step number
+      ttime += dt;
+      stepnum++;
+
+      printf("Computing time %f of %f (dt = %f)\n", ttime, duration, dt);
+
+      // compute forces
+      compute_forces();
+
+      // integrate particle motion
+      integrate_motion();
+
+      // write VTK file output
+      if(stepnum % 10 == 0) {
+        out_vtk(stepnum, ttime, np, part);
+      }
+    }
 
     // clean up
     clean_up();
