@@ -7,8 +7,6 @@
 #include "sph.h"
 #include "phys.h"
 
-#define G 6.674e-11
-
 void compute_forces(void) {
   int i, j;               // iterators
   float rx, ry, rz, r;    // distance vector components and magnitude
@@ -22,8 +20,8 @@ void compute_forces(void) {
         rx = part[j].x - part[i].x;
         ry = part[j].y - part[i].y;
         rz = part[j].z - part[i].z;
-        r  = rx*rx + ry*ry + rz*rz;
-        if(r < 1e-6) r = 1e-6;
+        r  = sqrt(rx*rx + ry*ry + rz*rz);
+        if(r < 1.e-6) r = 1.e-6;
 
         part[i].Fx += (rx / r) * G * part[i].m * part[j].m / (r*r);
         part[i].Fy += (ry / r) * G * part[i].m * part[j].m / (r*r);
@@ -49,6 +47,7 @@ void integrate_motion(void) {
     part[i].y = part[i].y + dt * part[i].vy;
     part[i].z = part[i].z + dt * part[i].vz;
 
+/*
     if(part[i].x < -10) {
       part[i].x = -10;
     } else if(part[i].x > 10) {
@@ -64,5 +63,6 @@ void integrate_motion(void) {
     } else if(part[i].z > 10) {
       part[i].z = 10;
     }
+*/
   }
 }

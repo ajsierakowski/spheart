@@ -38,14 +38,13 @@ void read_config(void)
   part = malloc(np * sizeof(part_struct));
 
   // read each particle configuration
-  fret = fscanf(infile, "(x, y, z) m\n");
+  fret = fscanf(infile, "(x, y, z) m (vx, vy, vz)\n");
   for(i = 0; i < np; i++) {
-    fret = fscanf(infile, "%f %f %f %f\n", &part[i].x, &part[i].y, &part[i].z,
-      &part[i].m);
-    // initialize forces, velocities, and accelerations equal to zero for now
-    part[i].vx = 0.;
-    part[i].vy = 0.;
-    part[i].vz = 0.;
+    fret = fscanf(infile, "%f %f %f %f %f %f %f\n",
+      &part[i].x, &part[i].y, &part[i].z,
+      &part[i].m,
+      &part[i].vx, &part[i].vy, &part[i].vz);
+    // initialize forces and accelerations equal to zero for now
     part[i].ax = 0.;
     part[i].ay = 0.;
     part[i].az = 0.;
@@ -68,8 +67,9 @@ void show_config(void)
   printf("duration = %6.4f\n", duration);
   printf("dt = %6.4f\n", dt);
   for(i = 0; i < np; i++) {
-    printf("part[%d]: (%7.4f, %7.4f, %7.4f), m = %7.4f\n", i,
+    printf("part[%d]: (%7.4f, %7.4f, %7.4f), m = %7.4f", i,
       part[i].x, part[i].y, part[i].z, part[i].m);
+    printf(", (%7.4f, %7.4f, %7.4f)\n", part[i].vx, part[i].vy, part[i].vz);
   }
 }
 
@@ -77,12 +77,12 @@ void show_config(void)
 void write_config_random(int np, float xs, float xe, float ys, float ye,
   float zs, float ze)
 {
-  int i;                    // iterator
-  char loc[BUFLEN] = "";    // file location
-  int fret = 0;             // fscanf return value
-  fret = fret;              // prevent compiler warning
+  int i;                        // iterator
+  char loc[BUFLEN] = "";        // file location
+  int fret = 0;                 // fscanf return value
+  fret = fret;                  // prevent compiler warning
 
-  float x, y, z, m;         // particle parameters to write
+  float x, y, z, m, vx, vy, vz; // particle parameters to write
 
   // set random number generator seed
   rng_init(time(NULL));
@@ -98,7 +98,7 @@ void write_config_random(int np, float xs, float xe, float ys, float ye,
   // write number of particles and header line
   fprintf(outfile, "np %d\n", np);
   fprintf(outfile, "duration 1.\ndt 0.01\n");
-  fprintf(outfile, "(x, y, z) m\n");
+  fprintf(outfile, "(x, y, z) m (vx, vy, vz)\n");
 
   // write each particle configuration
   for(i = 0; i < np; i++) {
@@ -107,9 +107,12 @@ void write_config_random(int np, float xs, float xe, float ys, float ye,
     y  = (ye - ys) * rng_flt() + ys;
     z  = (ze - zs) * rng_flt() + zs;
     m  = 1.;
+    vx = 0.;
+    vy = 0.;
+    vz = 0.;
     // write to file
-    fprintf(outfile, "%9.6f %9.6f %9.6f %9.6f\n",
-      x, y, z, m);
+    fprintf(outfile, "%9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f\n",
+      x, y, z, m, vx, vy, vz);
   }
 
   printf("Random configuration written to %s\n", loc);
