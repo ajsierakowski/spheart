@@ -21,11 +21,16 @@ void compute_forces(void) {
         ry = part[j].y - part[i].y;
         rz = part[j].z - part[i].z;
         r  = sqrt(rx*rx + ry*ry + rz*rz);
-        if(r < 1.e-6) r = 1.e-6;
 
-        part[i].Fx += (rx / r) * G * part[i].m * part[j].m / (r*r);
-        part[i].Fy += (ry / r) * G * part[i].m * part[j].m / (r*r);
-        part[i].Fz += (rz / r) * G * part[i].m * part[j].m / (r*r);
+        if(r > (part[i].r + part[j].r)) {
+          part[i].Fx += (rx / r) * G * part[i].m * part[j].m / (r*r);
+          part[i].Fy += (ry / r) * G * part[i].m * part[j].m / (r*r);
+          part[i].Fz += (rz / r) * G * part[i].m * part[j].m / (r*r);
+        } else {
+          part[i].Fx -= (rx / r) * part[i].E * fabs(part[i].r - r);
+          part[i].Fy -= (ry / r) * part[i].E * fabs(part[i].r - r);
+          part[i].Fz -= (rz / r) * part[i].E * fabs(part[i].r - r);
+        }
       }
     }
   }
@@ -34,35 +39,45 @@ void compute_forces(void) {
 void integrate_motion(void) {
   int i;                // iterator
 
+  float ax, ay, az;     // temporary velocity storage
+  float vx, vy, vz;     // temporary velocity storage
+
   for(i = 0; i < np; i++) {
-    part[i].ax = part[i].Fx / part[i].m;
-    part[i].ay = part[i].Fy / part[i].m;
-    part[i].az = part[i].Fz / part[i].m;
+    ax = part[i].Fx / part[i].m;
+    ay = part[i].Fy / part[i].m;
+    az = part[i].Fz / part[i].m;
 
-    part[i].vx = part[i].vx + dt * part[i].ax;
-    part[i].vy = part[i].vy + dt * part[i].ay;
-    part[i].vz = part[i].vz + dt * part[i].az;
+    vx = part[i].vx + dt * (1.5 * ax - 0.5 * part[i].ax);
+    vy = part[i].vy + dt * (1.5 * ay - 0.5 * part[i].ay);
+    vz = part[i].vz + dt * (1.5 * az - 0.5 * part[i].az);
 
-    part[i].x = part[i].x + dt * part[i].vx;
-    part[i].y = part[i].y + dt * part[i].vy;
-    part[i].z = part[i].z + dt * part[i].vz;
+    part[i].x += dt * (1.5 * vx - 0.5 * part[i].vx);
+    part[i].y += dt * (1.5 * vy - 0.5 * part[i].vy);
+    part[i].z += dt * (1.5 * vz - 0.5 * part[i].vz);
 
-/*
-    if(part[i].x < -10) {
-      part[i].x = -10;
-    } else if(part[i].x > 10) {
-      part[i].x = 10;
+    // store acceleration and velocity
+    part[i].ax = ax;
+    part[i].ay = ay;
+    part[i].az = az;
+
+    part[i].vx = vx;
+    part[i].vy = vy;
+    part[i].vz = vz;
+
+    if(part[i].x < xs) {
+      part[i].vx = -part[i].vx;
+    } else if(part[i].x > xe) {
+      part[i].vx = -part[i].vx;
     }
-    if(part[i].y < -10) {
-      part[i].y = -10;
-    } else if(part[i].y > 10) {
-      part[i].y = 10;
+    if(part[i].y < ys) {
+      part[i].vy = -part[i].vy;
+    } else if(part[i].y > ye) {
+      part[i].vy = -part[i].vy;
     }
-    if(part[i].z < -10) {
-      part[i].z = -10;
-    } else if(part[i].z > 10) {
-      part[i].z = 10;
+    if(part[i].z < zs) {
+      part[i].vz = -part[i].vz;
+    } else if(part[i].z > ze) {
+      part[i].vz = -part[i].vz;
     }
-*/
   }
 }

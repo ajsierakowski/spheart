@@ -16,6 +16,12 @@ float ttime;
 float duration;
 float dt;
 int stepnum;
+float xs;
+float ys;
+float zs;
+float xe;
+float ye;
+float ze;
 
 // begin main program
 int main(int argc, char *argv[])

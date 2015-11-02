@@ -88,13 +88,21 @@ void part_out_vtk(int stepnum, int n, part_struct *part)
   fprintf(ofile, "\n</DataArray>\n");
   fprintf(ofile, "</Points>\n");
 
-  fprintf(ofile, "<PointData Scalars=\"n m\" ");
+  fprintf(ofile, "<PointData Scalars=\"n radius mass\" ");
   fprintf(ofile, "Vectors=\"velocity acceleration force\">\n");
 
   // write particle number
   fprintf(ofile, "<DataArray type=\"Int32\" Name=\"n\" format=\"ascii\">\n");
   for(i = 0; i < n; i++) {
     fprintf(ofile, "%d ", i);
+  }
+  fprintf(ofile, "\n</DataArray>\n");
+
+  // write particle radius 
+  fprintf(ofile, "<DataArray type=\"Float32\" Name=\"radius\" ");
+  fprintf(ofile, "format=\"ascii\">\n");
+  for(i = 0; i < n; i++) {
+    fprintf(ofile, "%e ", part[i].r);
   }
   fprintf(ofile, "\n</DataArray>\n");
 

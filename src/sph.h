@@ -24,6 +24,7 @@ typedef struct part_struct {
   float y;
   float z;
   float m;
+  float r;
   float vx;
   float vy;
   float vz;
@@ -33,6 +34,7 @@ typedef struct part_struct {
   float Fx;
   float Fy;
   float Fz;
+  float E;
 } part_struct;
 
 // create pointer to particle list
@@ -49,5 +51,13 @@ float dt;
 
 // time step number
 int stepnum;
+
+// domain specification
+float xs;
+float ys;
+float zs;
+float xe;
+float ye;
+float ze;
 
 #endif
