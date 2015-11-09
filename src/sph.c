@@ -22,6 +22,7 @@ float zs;
 float xe;
 float ye;
 float ze;
+float h;
 
 // begin main program
 int main(int argc, char *argv[])
@@ -41,6 +42,18 @@ int main(int argc, char *argv[])
       printf("Number of particles to seed: ");
       fgets(buf, BUFLEN, stdin);
       np = atoi(buf);
+      // prompt for particle radius
+      printf("Particle radius: ");
+      fgets(buf, BUFLEN, stdin);
+      float r_in = atof(buf);
+      // prompt for particle mass
+      printf("Particle mass: ");
+      fgets(buf, BUFLEN, stdin);
+      float m_in = atof(buf);
+      // prompt for particle Young's modulus
+      printf("Particle modulus: ");
+      fgets(buf, BUFLEN, stdin);
+      float E_in = atof(buf);
 
       // prompt for minima and maxima
       printf("Minimum in x direction: ");
@@ -63,7 +76,7 @@ int main(int argc, char *argv[])
       ze = atof(buf);
 
       // write random configuration
-      write_config_random(np, xs, xe, ys, ye, zs, ze);
+      write_config_random(np, r_in, m_in, E_in, xs, xe, ys, ye, zs, ze);
     }
   } else if(argc > 1) {
     printf("spheart usage: '-s' to randomly seed configuration\n");
@@ -73,7 +86,7 @@ int main(int argc, char *argv[])
     read_config();
 
     // show configuration
-    show_config();
+    //show_config();
 
     // initialize VTK file output
     init_vtk();

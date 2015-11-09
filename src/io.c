@@ -8,6 +8,7 @@
 #include "rng.h"
 #include "sph.h"
 #include "time.h"
+#include <math.h>
 
 // read configuration from file
 void read_config(void)
@@ -28,6 +29,7 @@ void read_config(void)
   // begin reading config file
   fret = fscanf(infile, "(xs, ys, zs) %f %f %f\n", &xs, &ys, &zs);
   fret = fscanf(infile, "(xe, ye, ze) %f %f %f\n", &xe, &ye, &ze);
+  fret = fscanf(infile, "h %f\n", &h);
   fret = fscanf(infile, "np %d\n", &np);
   fret = fscanf(infile, "duration %f\n", &duration);
   fret = fscanf(infile, "dt %f\n", &dt);
@@ -67,6 +69,7 @@ void show_config(void)
   // write configuration to stdout
   printf("(xs, ys, zs) = (%7.4f, %7.4f, %7.4f)\n", xs, ys, zs);
   printf("(xe, ye, ze) = (%7.4f, %7.4f, %7.4f)\n", xe, ye, ze);
+  printf("h = %7.4f\n", h);
   printf("np = %d\n", np);
   printf("duration = %6.4f\n", duration);
   printf("dt = %6.4f\n", dt);
@@ -78,15 +81,13 @@ void show_config(void)
 }
 
 // randomly distribute particles and write configuration to file
-void write_config_random(int np, float xs, float xe, float ys, float ye,
-  float zs, float ze)
+void write_config_random(int np, float r, float m, float E,
+  float xs, float xe, float ys, float ye, float zs, float ze)
 {
-  int i;                              // iterator
+  int i, j;                           // iterator
   char loc[BUFLEN] = "";              // file location
   int fret = 0;                       // fscanf return value
   fret = fret;                        // prevent compiler warning
-
-  float x, y, z, r, m, vx, vy, vz, E; // particle parameters to write
 
   // set random number generator seed
   rng_init(time(NULL));
@@ -102,26 +103,54 @@ void write_config_random(int np, float xs, float xe, float ys, float ye,
   // write number of particles and header line
   fprintf(outfile, "(xs, ys, zs) %f %f %f\n", xs, ys, zs);
   fprintf(outfile, "(xe, ye, ze) %f %f %f\n", xe, ye, ze);
+  float H = (xe-xs + ye-ys + ze-zs) / 3.;
+  fprintf(outfile, "h %f\n", H);
   fprintf(outfile, "np %d\n", np);
   fprintf(outfile, "duration 1.\ndt 0.01\n");
   fprintf(outfile, "(x, y, z) r m (vx, vy, vz) E\n");
 
+  // make a temporary particle structure
+  part_struct *part_out = malloc(np * sizeof(part_struct));
+
   // write each particle configuration
   for(i = 0; i < np; i++) {
-    // restrict within given domain size
-    x  = (xe - xs) * rng_flt() + xs;
-    y  = (ye - ys) * rng_flt() + ys;
-    z  = (ze - zs) * rng_flt() + zs;
-    r  = 0.1;
-    m  = 1.;
-    vx = 0.;
-    vy = 0.;
-    vz = 0.;
-    E = 1.e9;
-    // write to file
-    fprintf(outfile, "%9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f\n",
-      x, y, z, r, m, vx, vy, vz, E);
+    printf("Placing particle number %d of %d\n", i+1, np);
+    int intersect = 0;
+    while(!intersect) {
+      // restrict within given domain size
+      part_out[i].x  = (xe - xs) * rng_flt() + xs;
+      part_out[i].y  = (ye - ys) * rng_flt() + ys;
+      part_out[i].z  = (ze - zs) * rng_flt() + zs;
+      part_out[i].r  = r;
+      part_out[i].m  = m;
+      part_out[i].vx = rng_flt() - 0.5;
+      part_out[i].vy = rng_flt() - 0.5;
+      part_out[i].vz = rng_flt() - 0.5;
+      part_out[i].E = E;
+
+      intersect = !intersect;
+
+      // check whether this particle interferes with any others
+      for(j = 0; j < i; j++) {
+        float r=sqrt((part_out[j].x-part_out[i].x)*(part_out[j].x-part_out[i].x)
+                 + (part_out[j].y-part_out[i].y)*(part_out[j].y-part_out[i].y)
+                 + (part_out[j].z-part_out[i].z)*(part_out[j].z-part_out[i].z));
+        if(r < (part_out[i].r + part_out[j].r)) {
+          intersect = !intersect;
+          break;
+        }
+      }
+    }
   }
+
+  // write to file
+  for(i = 0; i < np; i++) {
+    fprintf(outfile, "%9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f %9.6f\n",
+      part_out[i].x, part_out[i].y, part_out[i].z, part_out[i].r, part_out[i].m,
+      part_out[i].vx, part_out[i].vy, part_out[i].vz, part_out[i].E);
+  }
+
+  free(part_out);
 
   printf("Random configuration written to %s\n", loc);
 

@@ -14,8 +14,8 @@ void read_config(void);
 void show_config(void);
 
 // write random simulation configuration
-void write_config_random(int np, float xs, float xe, float ys, float ye,
-  float zs, float ze);
+void write_config_random(int np, float r, float m, float E,
+  float xs, float xe, float ys, float ye, float zs, float ze);
 
 // free allocated space at the end
 void clean_up(void);

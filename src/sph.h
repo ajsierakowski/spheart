@@ -60,4 +60,7 @@ float xe;
 float ye;
 float ze;
 
+// bin size
+float h;
+
 #endif
